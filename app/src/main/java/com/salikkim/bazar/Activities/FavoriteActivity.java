@@ -34,7 +34,7 @@ public class FavoriteActivity extends AppCompatActivity implements FavoriteClick
         favoriteBinding = ActivityFavoriteBinding.inflate(getLayoutInflater());
         View view = favoriteBinding.getRoot();
         setContentView(view);
-        favoriteBinding.toolbarFavActivity.setTitle("Favorite");
+        favoriteBinding.toolbarFavActivity.setTitle("Favorites");
         setSupportActionBar(favoriteBinding.toolbarFavActivity);
         favoriteBinding.toolbarFavActivity.setNavigationIcon(R.drawable.baseline_arrow_back);
         favoriteBinding.toolbarFavActivity.setNavigationOnClickListener(v -> finish());

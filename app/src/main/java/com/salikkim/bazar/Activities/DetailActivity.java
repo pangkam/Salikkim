@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.salikkim.bazar.Adapters.AddressAdapter;
 import com.salikkim.bazar.Adapters.ImageAdapter;
 import com.salikkim.bazar.Helper.ApiController;
+import com.salikkim.bazar.Models.Address;
 import com.salikkim.bazar.Models.Product;
 import com.salikkim.bazar.Models.ResponseModel;
 import com.salikkim.bazar.R;
@@ -34,7 +35,7 @@ public class DetailActivity extends AppCompatActivity {
     private ActivityDetailBinding detailBinding;
     private Product product;
     private ArrayList<String> imageLists = new ArrayList<>();
-    private ArrayList<String> addressLists = new ArrayList<>();
+    private ArrayList<Address> addressLists = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,7 +195,8 @@ public class DetailActivity extends AppCompatActivity {
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject obj = jsonArray.getJSONObject(i);
             String address = i + 1 + "." + obj.getString("Name");
-            addressLists.add(address);
+            int id = obj.getInt("Id");
+            addressLists.add(new Address(id,address));
 
         }
         detailBinding.recViewAddressDetail.setHasFixedSize(false);

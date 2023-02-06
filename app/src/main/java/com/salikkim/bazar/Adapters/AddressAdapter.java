@@ -9,15 +9,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.salikkim.bazar.Models.Address;
 import com.salikkim.bazar.R;
 
 import java.util.List;
 
 public class AddressAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private Context context;
-    private List<String> addressLists;
+    private List<Address> addressLists;
 
-    public AddressAdapter(Context context, List<String> addressLists) {
+    public AddressAdapter(Context context, List<Address> addressLists) {
         this.context = context;
         this.addressLists = addressLists;
     }
@@ -34,7 +35,7 @@ public class AddressAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         final int pos = position;
         AddressViewHolder addressViewHolder = (AddressViewHolder) holder;
-        addressViewHolder.addressView.setText(addressLists.get(pos));
+        addressViewHolder.addressView.setText(addressLists.get(pos).getName());
 
 
     }

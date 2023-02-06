@@ -3,24 +3,24 @@ package com.salikkim.bazar.Fragments;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Toast;
 
+import com.salikkim.bazar.Activities.CartActivity;
 import com.salikkim.bazar.Activities.FavoriteActivity;
 import com.salikkim.bazar.Activities.OrderActivity;
 import com.salikkim.bazar.Activities.WebActivity;
-import com.salikkim.bazar.Adapters.CategoryAdapter;
-import com.salikkim.bazar.Helper.SetupAcDialog;
+import com.salikkim.bazar.BuildConfig;
 import com.salikkim.bazar.R;
 import com.salikkim.bazar.databinding.FragmentAccountBinding;
-import com.salikkim.bazar.databinding.FragmentCategoryBinding;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -90,6 +90,24 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
             case R.id.btn_order_account:
                 startActivity(new Intent(getActivity(), OrderActivity.class));
                 break;
+            case R.id.btn_account_fav:
+                startActivity(new Intent(getActivity(), FavoriteActivity.class));
+                break;
+            case R.id.btn_cart:
+                startActivity(new Intent(getActivity(), CartActivity.class));
+                break;
+            case R.id.btn_logout:
+                Toast.makeText(getActivity(), "Log out", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.btn_become_seller:
+                Toast.makeText(getActivity(), "Please contact us", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.btn_share_app:
+                shareApp();
+                break;
+            case R.id.btn_rate_app:
+                rateApp();
+                break;
             case R.id.btn_privacy:
                 startActivity(new Intent(getActivity(), WebActivity.class).putExtra("web_view", "privacy"));
                 break;
@@ -97,18 +115,34 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
                 startActivity(new Intent(getActivity(), WebActivity.class).putExtra("web_view", "about"));
                 break;
             case R.id.btn_account_settings:
-                SetupAcDialog setupAcDialog = new SetupAcDialog(getActivity());
+                SetupAcDialog setupAcDialog = new SetupAcDialog(getActivity(), "Tura, West Garo Hills, Meghalaya");
                 setupAcDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 setupAcDialog.setCancelable(true);
                 setupAcDialog.show();
                 Window window = setupAcDialog.getWindow();
                 window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
                 break;
+        }
+    }
 
-            case R.id.btn_account_fav:
-                startActivity(new Intent(getActivity(), FavoriteActivity.class));
-                break;
+    private void rateApp() {
+        Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=" + getActivity().getPackageName());
+        Intent rate = new Intent(Intent.ACTION_VIEW, uri);
+        rate.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(rate);
+    }
 
+    private void shareApp() {
+        try {
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Salikkim");
+            String shareMessage = "\nPurchase fashionable clothing and shoes\n\n";
+            shareMessage = shareMessage + "https://play.google.com/store/apps/details?id=" + BuildConfig.APPLICATION_ID + "\n\n";
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
+            startActivity(Intent.createChooser(shareIntent, "Share with"));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

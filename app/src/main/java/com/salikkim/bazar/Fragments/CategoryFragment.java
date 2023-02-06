@@ -1,5 +1,6 @@
 package com.salikkim.bazar.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.salikkim.bazar.Activities.SearchActivity;
 import com.salikkim.bazar.Adapters.CategoryAdapter;
 import com.salikkim.bazar.Helper.ApiController;
 import com.salikkim.bazar.Interfaces.CategoryClick;
@@ -110,6 +112,7 @@ public class CategoryFragment extends Fragment implements CategoryClick {
 
     @Override
     public void onCategoryClick(Category category, int position) {
-
+        startActivity(new Intent(getActivity(), SearchActivity.class)
+                .putExtra("query", category.getTitle()));
     }
 }

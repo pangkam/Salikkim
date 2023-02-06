@@ -33,7 +33,7 @@ public class OrderActivity extends AppCompatActivity implements OrderClick {
         orderBinding = ActivityOrderBinding.inflate(getLayoutInflater());
         View view = orderBinding.getRoot();
         setContentView(view);
-        orderBinding.toolbarOrderActivity.setTitle("Cart");
+        orderBinding.toolbarOrderActivity.setTitle("Orders");
         setSupportActionBar(orderBinding.toolbarOrderActivity);
         orderBinding.toolbarOrderActivity.setNavigationIcon(R.drawable.baseline_arrow_back);
         orderBinding.toolbarOrderActivity.setNavigationOnClickListener(v -> finish());

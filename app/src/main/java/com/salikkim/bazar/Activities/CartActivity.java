@@ -38,9 +38,9 @@ public class CartActivity extends AppCompatActivity implements CartClick, Adapte
     private List<Cart> cartList = new ArrayList<>();
     private CartAdapter cartAdapter;
     private String address_name = "Ampati, South West Garo Hills, Meghalaya";
-    private int address_id = 0;
-    private double total_price = 0;
-    private int seller_id = 0;
+    private int address_id;
+    private double total_price;
+    private int seller_id;
     private String seller_contacts = "";
     private String seller_accounts = "";
 
@@ -261,8 +261,6 @@ public class CartActivity extends AppCompatActivity implements CartClick, Adapte
     @Override
     public void onClick(View view) {
         if (total_price != 0 &&
-                address_id != 0 &&
-                seller_id != 0 &&
                 !seller_contacts.equals("") &&
                 !seller_accounts.equals("")) {
 

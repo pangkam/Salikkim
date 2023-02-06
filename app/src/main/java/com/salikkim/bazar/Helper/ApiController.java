@@ -5,7 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiController
 {
-   private static final String url="http://192.168.1.34/salikkim_store/";
+   private static final String url="http://192.168.1.9/salikkim_store/";
    private static ApiController clientobject;
    private static Retrofit retrofit;
 

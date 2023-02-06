@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationBarView;
@@ -74,15 +75,28 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
+        MenuItem search = menu.findItem(R.id.search);
+        SearchView searchView = (SearchView) search.getActionView();
+        searchView.setQueryHint("Type to search");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                startActivity(new Intent(MainActivity.this, SearchActivity.class)
+                        .putExtra("query", s));
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                return false;
+            }
+        });
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.search:
-                Toast.makeText(this, "Search", Toast.LENGTH_SHORT).show();
-                break;
             case R.id.favorite:
                 startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
                 break;

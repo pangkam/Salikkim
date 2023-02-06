@@ -47,6 +47,7 @@
             </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tl_name_dialog"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -70,7 +71,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:hint="Mobile"
+                android:hint="Mobile(WhatsApp)"
+                android:id="@+id/tl_mobile_dialog"
                 android:padding="2dp"
                 android:textColorHint="@color/hint_text"
                 app:boxStrokeColor="@color/secondary_text">
@@ -90,8 +92,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:hint="Alternate Mobile"
+                android:hint="Alternate Mobile(Optional)"
                 android:padding="2dp"
+                android:id="@+id/tl_alt_mobile_dialog"
                 android:textColorHint="@color/hint_text"
                 app:boxStrokeColor="@color/secondary_text">
 
@@ -112,6 +115,7 @@
                 android:layout_marginTop="5dp"
                 android:hint="Email"
                 android:padding="2dp"
+                android:id="@+id/tl_email_dialog"
                 android:textColorHint="@color/hint_text"
                 app:boxStrokeColor="@color/secondary_text">
 
@@ -132,48 +136,51 @@
                 android:orientation="vertical"
                 android:padding="10dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Address"
-                        android:textColor="@color/secondary_text"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="SELECT"
-                        android:textColor="@color/red"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
                 <TextView
-                    android:id="@+id/tv_address_acc_dialog"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="West, Garo Hills, Meghalaya"
+                    android:text="Address"
                     android:textColor="@color/secondary_text"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
+                    android:textSize="13sp" />
+
+                <Spinner
+                    android:id="@+id/ac_addr_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:backgroundTint="@color/secondary_text"
+                    android:popupBackground="@color/white" />
+
             </LinearLayout>
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/bg8"
-                android:padding="15dp"
-                android:text="SAVE"
-                android:textAlignment="center"
-                android:textColor="@color/white"
-                android:textSize="14sp" />
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/btn_save_ac_dialog"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:text="SAVE"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:visibility="visible" />
+
+                <ProgressBar
+                    android:id="@+id/progress_ac_dialog"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminateTint="@color/white"
+                    android:padding="5dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
