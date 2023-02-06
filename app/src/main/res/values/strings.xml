@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Salikkim</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="Rs">\u20B9</string>
+    <string name="upload_notice">Pay to any of these UPI account and take screenshot of your transaction then upload it. After the screenshot is successfully uploaded the seller will review your order. The review may take time depends on a seller.</string>
+    <string name="order_success_notice">The seller will review your transaction. After the reviewed is completed the seller will confirm your order</string>
+</resources>

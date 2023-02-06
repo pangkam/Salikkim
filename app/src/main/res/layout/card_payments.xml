@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:cardBackgroundColor="@color/white">
+
+    <ImageView
+        android:id="@+id/payment_screenshot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/layout1_payment"
+        android:layout_alignParentTop="true"
+        android:scaleType="fitCenter"
+        android:src="@mipmap/ic_launcher" />
+
+    <LinearLayout
+        android:gravity="center"
+        android:layout_margin="10dp"
+        android:id="@+id/layout1_payment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/payment_upi_number"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Gpay No: 000000000"
+                android:textColor="@color/secondary_text"
+                android:textSize="14sp"/>
+
+            <ImageView
+                android:id="@+id/btn_copy_upi_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:src="@drawable/baseline_content_copy" />
+        </LinearLayout>
+        <View
+            android:layout_margin="5dp"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/secondary_text"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="4dp">
+
+            <TextView
+                android:id="@+id/payment_upi_id"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Gpay ID: example@oksbi"
+                android:textColor="@color/secondary_text"
+                android:textSize="14sp"/>
+
+            <ImageView
+                android:id="@+id/btn_copy_upi_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:src="@drawable/baseline_content_copy" />
+        </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>

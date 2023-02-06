@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.WebActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout_webview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="top">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbarWebViewActivity"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:background="@color/background"
+            app:layout_scrollFlags="scroll|enterAlways|snap"
+            app:titleTextColor="@color/secondary_color" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <WebView
+        android:layout_below="@id/appBarLayout_webview"
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</RelativeLayout>
