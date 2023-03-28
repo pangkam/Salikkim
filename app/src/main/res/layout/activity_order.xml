@@ -26,11 +26,10 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recView_order"
-        android:layout_margin="5dp"
-        android:background="@drawable/bg1"
         android:layout_width="match_parent"
+        android:padding="5dp"
         android:layout_height="match_parent"
         android:layout_below="@id/appBarLayout_order"
-        android:layout_alignParentBottom="true" />
+        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>

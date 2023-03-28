@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.Html;
@@ -23,19 +24,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity implements View.OnClickListener {
     private ActivityDetailBinding detailBinding;
     private Product product;
     private ArrayList<String> imageLists = new ArrayList<>();
     private ArrayList<Address> addressLists = new ArrayList<>();
+    private String user_id = null;
+    private String MY_PREFS_NAME = "User";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,13 +45,19 @@ public class DetailActivity extends AppCompatActivity {
         View view = detailBinding.getRoot();
         setContentView(view);
         product = (Product) getIntent().getParcelableExtra("product");
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
+        user_id = prefs.getString("user_id", null);
+        detailBinding.btnAddCart.setOnClickListener(this);
+        detailBinding.btnAddFavorite.setOnClickListener(this);
+        detailBinding.btnCloseDetail.setOnClickListener(this);
         if (product != null)
             initViews();
     }
 
     private void initViews() {
         try {
-            setImages();
+            if (product.getImages() != null)
+                setImages();
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -63,12 +70,8 @@ public class DetailActivity extends AppCompatActivity {
         detailBinding.sizeDetail.setText(Html.fromHtml("Size: <b>" + product.getSize() + "</b>"));
         detailBinding.descDetail.setText(product.getP_Desc());
         detailBinding.sellerDetail.setText(Html.fromHtml("Seller: <b>" + product.getSeller_Name() + "</b>"));
-        detailBinding.quantityDetail.setText(product.getQuantity()+" lefts");
-        if (product.getCOD().equals("Yes")) {
-            detailBinding.codDetail.setVisibility(View.VISIBLE);
-        } else {
-            detailBinding.codDetail.setVisibility(View.GONE);
-        }
+        detailBinding.quantityDetail.setText(product.getQuantity() + " lefts");
+
 
         if (product.getQuantity() >= 0) {
             detailBinding.tvStockDetail.setVisibility(View.GONE);
@@ -85,47 +88,12 @@ public class DetailActivity extends AppCompatActivity {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-
-        detailBinding.btnCloseDetail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
-
-        detailBinding.btnAddFavorite.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (detailBinding.progressFavorite.getVisibility() != View.VISIBLE & detailBinding.progressCart.getVisibility() != View.VISIBLE) {
-                    addToFavorite();
-                } else {
-                    Toast.makeText(DetailActivity.this, "Please wait", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        detailBinding.btnAddCart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (detailBinding.progressFavorite.getVisibility() != View.VISIBLE & detailBinding.progressCart.getVisibility() != View.VISIBLE) {
-                    if (detailBinding.tvCartDetail.getText().toString().equals("GO TO CART")) {
-                        startActivity(new Intent(DetailActivity.this, CartActivity.class));
-                    } else {
-                        addToCart();
-                    }
-                } else {
-                    Toast.makeText(DetailActivity.this, "Please wait", Toast.LENGTH_SHORT).show();
-
-                }
-            }
-        });
-
     }
 
     private void addToFavorite() {
         detailBinding.tvFavoriteDetail.setVisibility(View.GONE);
         detailBinding.progressFavorite.setVisibility(View.VISIBLE);
-        Call<ResponseModel> call = ApiController.getInstance().getApi().addFavorite(1, product.getP_Id());
+        Call<ResponseModel> call = ApiController.getInstance().getApi().addFavorite(user_id, product.getP_Id());
         call.enqueue(new Callback<ResponseModel>() {
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
@@ -150,7 +118,7 @@ public class DetailActivity extends AppCompatActivity {
     private void addToCart() {
         detailBinding.tvCartDetail.setVisibility(View.GONE);
         detailBinding.progressCart.setVisibility(View.VISIBLE);
-        Call<ResponseModel> call = ApiController.getInstance().getApi().addToCart(1,product.getS_id(),product.getP_Id());
+        Call<ResponseModel> call = ApiController.getInstance().getApi().addToCart(user_id, product.getS_id(), product.getP_Id());
         call.enqueue(new Callback<ResponseModel>() {
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
@@ -159,7 +127,7 @@ public class DetailActivity extends AppCompatActivity {
                 }
                 if (response.body() != null) {
                     Toast.makeText(DetailActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
-                    if(response.body().getStatus()){
+                    if (response.body().getStatus()) {
                         detailBinding.tvCartDetail.setText("GO TO CART");
                     }
                 }
@@ -179,7 +147,7 @@ public class DetailActivity extends AppCompatActivity {
         JSONArray jsonArray = new JSONArray(product.getImages());
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject obj = jsonArray.getJSONObject(i);
-            String uri = obj.getString("Img");
+            String uri = obj.getString("Url");
             imageLists.add(uri);
 
         }
@@ -191,12 +159,13 @@ public class DetailActivity extends AppCompatActivity {
 
     private void setAddress() throws JSONException {
         addressLists = new ArrayList<>();
-        JSONArray jsonArray = new JSONArray(product.getAddresses());
+        JSONArray jsonArray = new JSONArray(product.getAddress());
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject obj = jsonArray.getJSONObject(i);
             String address = i + 1 + "." + obj.getString("Name");
             int id = obj.getInt("Id");
-            addressLists.add(new Address(id,address));
+            String charge = obj.getString("Charge");
+            addressLists.add(new Address(id, address, charge));
 
         }
         detailBinding.recViewAddressDetail.setHasFixedSize(false);
@@ -205,4 +174,39 @@ public class DetailActivity extends AppCompatActivity {
         detailBinding.recViewAddressDetail.setAdapter(addressAdapter);
     }
 
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_add_favorite:
+                if (user_id != null) {
+                    if (detailBinding.progressFavorite.getVisibility() != View.VISIBLE & detailBinding.progressCart.getVisibility() != View.VISIBLE) {
+                        addToFavorite();
+                    } else {
+                        Toast.makeText(DetailActivity.this, "Please wait", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(this, "Login needed", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.btn_add_cart:
+                if (user_id != null) {
+                    if (detailBinding.progressFavorite.getVisibility() != View.VISIBLE & detailBinding.progressCart.getVisibility() != View.VISIBLE) {
+                        if (detailBinding.tvCartDetail.getText().toString().equals("GO TO CART")) {
+                            startActivity(new Intent(DetailActivity.this, CartActivity.class));
+                        } else {
+                            addToCart();
+                        }
+                    } else {
+                        Toast.makeText(DetailActivity.this, "Please wait", Toast.LENGTH_SHORT).show();
+
+                    }
+                } else {
+                    Toast.makeText(this, "Login needed", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.btn_close_detail:
+                finish();
+                break;
+        }
+    }
 }

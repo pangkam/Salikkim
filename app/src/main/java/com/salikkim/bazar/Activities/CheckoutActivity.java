@@ -1,5 +1,9 @@
 package com.salikkim.bazar.Activities;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -8,9 +12,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -46,23 +50,47 @@ public class CheckoutActivity extends AppCompatActivity implements View.OnClickL
     private ActivityCheckoutBinding checkoutBinding;
     private PaymentAdapter paymentAdapter;
     private List<Payment> paymentList = new ArrayList<>();
-    private String address_name = "";
+    private String address_name;
+    private String user_id;
+    private String MY_PREFS_NAME = "User";
+    private String mobile;
+    private String alt_mobile;
+    private ActivityResultLauncher<Intent> imageActivityResultLauncher;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        imageActivityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                            Uri image = result.getData().getData();
+                            String selectedImage = FileUtils.getPath(CheckoutActivity.this, image);
+                            uploadScreenshot(selectedImage);
+                        }
+                    }
+                });
+
         checkoutBinding = ActivityCheckoutBinding.inflate(getLayoutInflater());
         View view = checkoutBinding.getRoot();
         setContentView(view);
         double total_price = getIntent().getExtras().getDouble("total_price");
-        int address_id = getIntent().getExtras().getInt("address_id");
-        address_name = getIntent().getExtras().getString("address_name");
-        int seller_id = getIntent().getExtras().getInt("seller_id");
-        String seller_contacts = getIntent().getExtras().getString("seller_contacts");
-        String seller_accounts = getIntent().getExtras().getString("seller_accounts");
+        String seller_ac = getIntent().getExtras().getString("seller_acc");
+
+
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
+        user_id = prefs.getString("user_id", null);
+        address_name = prefs.getString("address_name", null);
+        mobile = prefs.getString("mobile", null);
+        alt_mobile = prefs.getString("alt_mobile", null);
+
         checkoutBinding.tvPriceProceed.setText(getApplicationContext().getString(R.string.Rs) + String.valueOf(total_price));
         checkoutBinding.tvAddressProceed.setText(address_name);
+        checkoutBinding.tvContact.setText(mobile);
+        checkoutBinding.tvOptContact.setText(alt_mobile);
         checkoutBinding.btnCloseProceed.setOnClickListener(this);
         checkoutBinding.btnUploadCheckout.setOnClickListener(this);
         checkoutBinding.btnAddContactProceed.setOnClickListener(this);
@@ -71,14 +99,14 @@ public class CheckoutActivity extends AppCompatActivity implements View.OnClickL
         checkoutBinding.viewPagerPayment.setAdapter(paymentAdapter);
 
         try {
-            getPaymentLists(seller_accounts);
+            getPaymentLists(seller_ac);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void getPaymentLists(String seller_acs) throws JSONException {
-        JSONArray jsonArray = new JSONArray(seller_acs);
+    private void getPaymentLists(String seller_ac) throws JSONException {
+        JSONArray jsonArray = new JSONArray(seller_ac);
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject obj = jsonArray.getJSONObject(i);
             String mode = obj.getString("Mode");
@@ -86,9 +114,8 @@ public class CheckoutActivity extends AppCompatActivity implements View.OnClickL
             String number = obj.getString("Number");
             String screenshot = obj.getString("Img");
             paymentList.add(new Payment(screenshot, id, number, mode));
+            paymentAdapter.notifyItemChanged(i, paymentList);
         }
-        paymentAdapter.notifyDataSetChanged();
-
 
         TabLayoutMediator layoutMediator = new TabLayoutMediator(checkoutBinding.paymentTaLayout, checkoutBinding.viewPagerPayment, new TabLayoutMediator.TabConfigurationStrategy() {
             @Override
@@ -133,10 +160,8 @@ public class CheckoutActivity extends AppCompatActivity implements View.OnClickL
         if (ContextCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(CheckoutActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 101);
         } else {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select image"), 1);
+            Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            imageActivityResultLauncher.launch(i);
         }
     }
 
@@ -151,33 +176,32 @@ public class CheckoutActivity extends AppCompatActivity implements View.OnClickL
         }).setNegativeButton("No", null).show();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            if (requestCode == 1 && null != data) {
-                Uri img_url = data.getData();
-                Uri imagePath = Uri.parse(FileUtils.getPath(CheckoutActivity.this, img_url));
-                File file = new File(imagePath.getPath());
-                uploadScreenshot(file);
-            }
-        }
-    }
 
-    private void uploadScreenshot(File file) {
-        RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), file);
-        MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
-        RequestBody customer_name = RequestBody.create(MediaType.parse("text/plain"), "Pangkam Damang");
-        RequestBody user_id = RequestBody.create(MediaType.parse("text/plain"), "1");
+    private void uploadScreenshot(String path) {
+        File file = new File(Uri.parse(path).getPath());
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part image = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+
+        RequestBody u_id = RequestBody.create(MediaType.parse("text/plain"), user_id);
         RequestBody address = RequestBody.create(MediaType.parse("text/plain"), address_name);
 
-        Call<ResponseModel> call = ApiController.getInstance().getApi().uploadScreenshot(filePart, customer_name, user_id, address);
+        Call<ResponseModel> call = ApiController.getInstance().getApi().addOrder(image, u_id, address);
         call.enqueue(new Callback<ResponseModel>() {
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                 if (response.body() != null) {
                     if (response.body().getStatus()) {
-                        showAlertDialog(response.body().getMessage());
+                        new AlertDialog.Builder(CheckoutActivity.this)
+                                .setTitle(response.body().getMessage())
+                                .setMessage(R.string.order_success_notice)
+                                .setCancelable(false)
+                                .setPositiveButton("OKAY", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                startActivity(new Intent(CheckoutActivity.this, MainActivity.class));
+                                finish();
+                            }
+                        }).show();
                     } else {
                         Toast.makeText(CheckoutActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -189,15 +213,5 @@ public class CheckoutActivity extends AppCompatActivity implements View.OnClickL
                 Toast.makeText(CheckoutActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void showAlertDialog(String s) {
-        new AlertDialog.Builder(CheckoutActivity.this).setTitle(s).setMessage(R.string.order_success_notice).setCancelable(false).setPositiveButton("OKAY", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                startActivity(new Intent(CheckoutActivity.this, MainActivity.class));
-                finish();
-            }
-        }).show();
     }
 }

@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto">
-<item
-    android:id="@+id/order_chat"
-    android:title="Chat with Seller"
-    android:icon="@drawable/ic_whatsapp"/>
-<item
-    android:id="@+id/order_report"
-    android:title="Report"
-    android:icon="@drawable/baseline_report"/>
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/order_chat"
+        android:icon="@drawable/ic_whatsapp"
+        android:title="Chat with Seller" />
+    <item
+        android:id="@+id/order_screenshot"
+        android:icon="@drawable/ic_whatsapp"
+        android:title="Screenshot" />
+    <item
+        android:id="@+id/order_report"
+        android:icon="@drawable/baseline_report"
+        android:title="Report" />
 </menu>

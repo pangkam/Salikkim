@@ -18,7 +18,9 @@
     <style name="BottomNavigationView" parent="@style/TextAppearance.AppCompat.Title">
         <item name="android:textSize">12sp</item>
     </style>
+
     <style name="BottomNavigationView.Active" parent="@style/TextAppearance.AppCompat.Title">
         <item name="android:textSize">14sp</item>
     </style>
+
 </resources>

@@ -1,6 +1,9 @@
 package com.salikkim.bazar.Fragments;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -29,6 +32,7 @@ import com.salikkim.bazar.databinding.FragmentAccountBinding;
  */
 public class AccountFragment extends Fragment implements View.OnClickListener {
     private FragmentAccountBinding accountBinding;
+    private String user_id;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -38,6 +42,8 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private String MY_PREFS_NAME = "User";
+    private int address_id;
 
     public AccountFragment() {
         // Required empty public constructor
@@ -81,22 +87,57 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         accountBinding.btnAbout.setOnClickListener(this);
         accountBinding.btnAccountSettings.setOnClickListener(this);
         accountBinding.btnAccountFav.setOnClickListener(this);
+        accountBinding.btnAccountCart.setOnClickListener(this);
+        accountBinding.btnShareApp.setOnClickListener(this);
+        accountBinding.btnBecomeSeller.setOnClickListener(this);
+        accountBinding.btnRateApp.setOnClickListener(this);
+        SharedPreferences prefs = getActivity().getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
+        user_id = prefs.getString("user_id", null);
+        address_id = prefs.getInt("address_id", 0);
+        String user_name = prefs.getString("user_name", null);
+        String mobile = prefs.getString("mobile", null);
+        String alt_mobile = prefs.getString("alt_mobile", null);
+        String email = prefs.getString("email", null);
+        String address_name = prefs.getString("address_name", null);
+        setViews(user_name, mobile, alt_mobile, email, address_name);
+        if (user_id != null) {
+            accountBinding.acLayoutAccount.setVisibility(View.VISIBLE);
+        } else {
+            accountBinding.acLayoutAccount.setVisibility(View.GONE);
+        }
         return view;
+    }
+
+    private void setViews(String user_name, String mobile, String alt_mobile, String email, String address_name) {
+        accountBinding.accountName.setText(user_name);
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(user_name);
+        stringBuilder.append("\nMobile: " + mobile);
+        stringBuilder.append("\nAlt Mobile: " + alt_mobile);
+        stringBuilder.append("\nEmail: " + email);
+        stringBuilder.append("\nAddress: " + address_name);
+        accountBinding.accountDetails.setText(stringBuilder);
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_order_account:
-                startActivity(new Intent(getActivity(), OrderActivity.class));
+                if (user_id != null) {
+                    startActivity(new Intent(getActivity(), OrderActivity.class).putExtra("user_id", user_id));
+                }
                 break;
             case R.id.btn_account_fav:
-                startActivity(new Intent(getActivity(), FavoriteActivity.class));
+                if (user_id != null) {
+                    startActivity(new Intent(getActivity(), FavoriteActivity.class).putExtra("user_id", user_id));
+                }
                 break;
-            case R.id.btn_cart:
-                startActivity(new Intent(getActivity(), CartActivity.class));
+            case R.id.btn_account_cart:
+                if (user_id != null) {
+                    startActivity(new Intent(getActivity(), CartActivity.class));
+                }
                 break;
-            case R.id.btn_logout:
+            case R.id.btn_account_logout:
                 Toast.makeText(getActivity(), "Log out", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.btn_become_seller:
@@ -115,7 +156,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
                 startActivity(new Intent(getActivity(), WebActivity.class).putExtra("web_view", "about"));
                 break;
             case R.id.btn_account_settings:
-                SetupAcDialog setupAcDialog = new SetupAcDialog(getActivity(), "Tura, West Garo Hills, Meghalaya");
+                SetupAcDialog setupAcDialog = new SetupAcDialog(getActivity(), address_id,false);
                 setupAcDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 setupAcDialog.setCancelable(true);
                 setupAcDialog.show();

@@ -49,18 +49,6 @@
                         android:text="Title"
                         android:textSize="12sp"
                         android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/cart_cod"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="3dp"
-                        android:layout_weight="1"
-                        android:text="COD"
-                        android:textAlignment="textEnd"
-                        android:textColor="@color/green"
-                        android:textSize="11sp"
-                        android:visibility="gone" />
                 </LinearLayout>
 
                 <TextView

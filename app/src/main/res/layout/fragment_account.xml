@@ -25,6 +25,8 @@
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/ac_layout_account"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
@@ -42,6 +44,7 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:id="@+id/account_name"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:paddingStart="10dp"
@@ -52,6 +55,7 @@
                                 android:textSize="20sp" />
 
                             <TextView
+                                android:id="@+id/account_details"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:paddingStart="10dp"
@@ -138,7 +142,7 @@
                         android:orientation="horizontal">
 
                         <LinearLayout
-                            android:id="@+id/btn_cart"
+                            android:id="@+id/btn_account_cart"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="5dp"
@@ -166,7 +170,7 @@
                         </LinearLayout>
 
                         <LinearLayout
-                            android:id="@+id/btn_logout"
+                            android:id="@+id/btn_account_logout"
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
@@ -195,6 +199,7 @@
 
                 </LinearLayout>
                 <LinearLayout
+                    android:id="@+id/ac_layout_app"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"

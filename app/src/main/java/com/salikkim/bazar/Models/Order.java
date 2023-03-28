@@ -1,12 +1,13 @@
 package com.salikkim.bazar.Models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 public class Order{
-    private String Images,Thumbnail,Title,Color,Size,Address,S_Name,Date,Payment_Screenshot;
-    private int O_Id,P_Id,S_id,Quantity,Status;
-    private double Total_Price,Shipping_Charge;
+    private String S_id,Images,Thumbnail,Title,Color,Size,Address,Seller_Name,Date,Payment_Screenshot,Desc;
+    private int O_Id,P_Id,Quantity,Status;
+    private double Price,Sale_Price,Discount,Shipping_Charge;
+
+    public String getS_id() {
+        return S_id;
+    }
 
     public String getImages() {
         return Images;
@@ -32,8 +33,8 @@ public class Order{
         return Address;
     }
 
-    public String getS_Name() {
-        return S_Name;
+    public String getSeller_Name() {
+        return Seller_Name;
     }
 
     public String getDate() {
@@ -44,16 +45,16 @@ public class Order{
         return Payment_Screenshot;
     }
 
+    public String getDesc() {
+        return Desc;
+    }
+
     public int getO_Id() {
         return O_Id;
     }
 
     public int getP_Id() {
         return P_Id;
-    }
-
-    public int getS_id() {
-        return S_id;
     }
 
     public int getQuantity() {
@@ -64,8 +65,16 @@ public class Order{
         return Status;
     }
 
-    public double getTotal_Price() {
-        return Total_Price;
+    public double getPrice() {
+        return Price;
+    }
+
+    public double getSale_Price() {
+        return Sale_Price;
+    }
+
+    public double getDiscount() {
+        return Discount;
     }
 
     public double getShipping_Charge() {

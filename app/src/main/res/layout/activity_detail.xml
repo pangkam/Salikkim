@@ -230,15 +230,6 @@
                                     android:text="Seller: Pangkam D Sangma"
                                     android:textColor="@color/secondary_text"
                                     android:textSize="13sp" />
-
-                                <TextView
-                                    android:id="@+id/cod_detail"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Cash on delivery available"
-                                    android:textColor="@color/green"
-                                    android:textSize="12sp"
-                                    android:visibility="visible" />
                             </LinearLayout>
                         </LinearLayout>
 

@@ -1,6 +1,7 @@
 package com.salikkim.bazar.Activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +19,7 @@ import com.salikkim.bazar.Helper.ApiController;
 import com.salikkim.bazar.Interfaces.CartClick;
 import com.salikkim.bazar.Models.Address;
 import com.salikkim.bazar.Models.Cart;
+import com.salikkim.bazar.Models.Payment;
 import com.salikkim.bazar.Models.ResponseModel;
 import com.salikkim.bazar.R;
 import com.salikkim.bazar.databinding.ActivityCartBinding;
@@ -37,12 +39,13 @@ public class CartActivity extends AppCompatActivity implements CartClick, Adapte
     private ActivityCartBinding cartBinding;
     private List<Cart> cartList = new ArrayList<>();
     private CartAdapter cartAdapter;
-    private String address_name = "Ampati, South West Garo Hills, Meghalaya";
-    private int address_id;
+    private String address_name;
     private double total_price;
-    private int seller_id;
-    private String seller_contacts = "";
-    private String seller_accounts = "";
+
+
+    private final String MY_PREFS_NAME = "User";
+    private int address_id;
+    private String user_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,17 +57,22 @@ public class CartActivity extends AppCompatActivity implements CartClick, Adapte
         setSupportActionBar(cartBinding.toolbarCartActivity);
         cartBinding.toolbarCartActivity.setNavigationIcon(R.drawable.baseline_arrow_back);
         cartBinding.toolbarCartActivity.setNavigationOnClickListener(v -> finish());
+
+        SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
+        user_id = prefs.getString("user_id", null);
+        address_id = prefs.getInt("address_id", 0);
+        address_name = prefs.getString("address_name", null);
         cartBinding.recViewCart.setHasFixedSize(false);
         cartBinding.recViewCart.setLayoutManager(new LinearLayoutManager(CartActivity.this));
-        cartAdapter = new CartAdapter(CartActivity.this, cartList, address_name, this);
+        cartAdapter = new CartAdapter(CartActivity.this, cartList, this);
         cartBinding.recViewCart.setAdapter(cartAdapter);
         cartBinding.cartAddrSpinner.setOnItemSelectedListener(this);
-        getAddress(address_name);
-        getCartLists();
         cartBinding.btnCheckoutCart.setOnClickListener(this);
+        getAddressLists();
+        getCartLists();
     }
 
-    private void getAddress(String ad_name) {
+    private void getAddressLists() {
         Call<List<Address>> call = ApiController.getInstance().getApi().getAddress();
         call.enqueue(new Callback<List<Address>>() {
             @Override
@@ -74,12 +82,14 @@ public class CartActivity extends AppCompatActivity implements CartClick, Adapte
                     return;
                 }
                 if (response.body() != null) {
-                    ArrayAddressAdapter addressAdapter = new ArrayAddressAdapter(CartActivity.this, response.body());
+                    List<Address> addresses = new ArrayList<>();
+                    addresses.add(new Address(0, "Select Address", null));
+                    addresses.addAll(response.body());
+                    ArrayAddressAdapter addressAdapter = new ArrayAddressAdapter(CartActivity.this, addresses);
                     cartBinding.cartAddrSpinner.setAdapter(addressAdapter);
 
-                    for (int i = 0; i < response.body().size(); i++) {
-                        if (ad_name.equals(response.body().get(i).getName())) {
-                            address_id = response.body().get(i).getId();
+                    for (int i = 0; i < addresses.size(); i++) {
+                        if (address_id == addresses.get(i).getId()) {
                             cartBinding.cartAddrSpinner.setSelection(i);
                         }
                     }
@@ -95,7 +105,7 @@ public class CartActivity extends AppCompatActivity implements CartClick, Adapte
 
     private void getCartLists() {
         cartList = new ArrayList<>();
-        Call<List<Cart>> call = ApiController.getInstance().getApi().getCart(1);
+        Call<List<Cart>> call = ApiController.getInstance().getApi().getCart(user_id, address_id);
         call.enqueue(new Callback<List<Cart>>() {
             @Override
             public void onResponse(Call<List<Cart>> call, Response<List<Cart>> response) {
@@ -107,8 +117,10 @@ public class CartActivity extends AppCompatActivity implements CartClick, Adapte
                     cartAdapter.setCartList(cartList);
                     cartBinding.recViewCart.setVisibility(View.VISIBLE);
                     cartBinding.tvEmpty.setVisibility(View.GONE);
+
                     try {
-                        setPrices(cartList);
+                        setAvailable();
+                        setPrices();
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
@@ -145,8 +157,8 @@ public class CartActivity extends AppCompatActivity implements CartClick, Adapte
         popup.show();
     }
 
-    private void updateQuantity(int c_id, int qnty) {
-        Call<ResponseModel> call = ApiController.getInstance().getApi().updateQuantity(c_id, qnty);
+    private void updateQuantity(int c_id, int quantity) {
+        Call<ResponseModel> call = ApiController.getInstance().getApi().updateQuantity(c_id, quantity);
         call.enqueue(new Callback<ResponseModel>() {
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
@@ -185,7 +197,8 @@ public class CartActivity extends AppCompatActivity implements CartClick, Adapte
                             cartBinding.tvEmpty.setVisibility(View.VISIBLE);
                         }
                         try {
-                            setPrices(cartList);
+                            setAvailable();
+                            setPrices();
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }
@@ -202,37 +215,21 @@ public class CartActivity extends AppCompatActivity implements CartClick, Adapte
         });
     }
 
-    private void setPrices(List<Cart> cartList) throws JSONException {
+    private void setPrices() throws JSONException {
         double total_bag = 0;
         double total_discount = 0;
         double total_sale = 0;
         double shipping_charges = 0;
         double total_payable = 0;
+
         for (int i = 0; i < cartList.size(); i++) {
             total_bag = total_bag + cartList.get(i).getPrice() * cartList.get(i).getQuantity();
             total_discount = total_discount + (cartList.get(i).getPrice() - cartList.get(i).getSale_Price()) * cartList.get(i).getQuantity();
             total_sale = total_sale + cartList.get(i).getSale_Price() * cartList.get(i).getQuantity();
-
-            if (cartList.get(i).getAddresses().contains(address_name)) {
-                JSONArray jsonArray = new JSONArray(cartList.get(i).getAddresses());
-                for (int j = 0; j < jsonArray.length(); j++) {
-                    JSONObject obj = jsonArray.getJSONObject(j);
-                    int id = obj.getInt("Id");
-                    String name = obj.getString("Name");
-                    double charge = obj.getDouble("Charge");
-                    if (name.equals(address_name)) {
-                        shipping_charges = shipping_charges + charge;
-                    }
-                }
-            }
+            shipping_charges = shipping_charges + cartList.get(i).getShipping_Charge();
         }
         total_payable = total_sale + shipping_charges;
         total_price = total_payable;
-        if (cartList.size() != 0) {
-            seller_id = cartList.get(0).getS_id();
-            seller_contacts = cartList.get(0).getSeller_Contacts();
-            seller_accounts = cartList.get(0).getSeller_Accounts();
-        }
         cartBinding.cartTotalBag.setText(getApplicationContext().getString(R.string.Rs) + total_bag);
         cartBinding.cartTotalDiscount.setText("-" + getApplicationContext().getString(R.string.Rs) + total_discount);
         cartBinding.cartTotalShippingCharges.setText(getApplicationContext().getString(R.string.Rs) + shipping_charges);
@@ -245,13 +242,39 @@ public class CartActivity extends AppCompatActivity implements CartClick, Adapte
         Address clickedItem = (Address) adapterView.getItemAtPosition(i);
         address_id = clickedItem.getId();
         address_name = clickedItem.getName();
-        cartAdapter.setAddress_name(address_name);
         try {
-            setPrices(cartList);
+            setAvailable();
+            setPrices();
         } catch (JSONException e) {
             throw new RuntimeException(e);
+
         }
+
+        SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+        editor.putInt("address_id", address_id);
+        editor.putString("address_name", address_name);
+        editor.apply();
     }
+
+    private void setAvailable() throws JSONException {
+        for (int i = 0; i < cartList.size(); i++) {
+            cartList.get(i).setShipping_Charge(0);
+            cartList.get(i).setAvailable(false);
+            JSONArray jsonArray = new JSONArray(cartList.get(i).getAddress());
+            for (int j = 0; j < jsonArray.length(); j++) {
+                JSONObject obj = jsonArray.getJSONObject(j);
+                int id = obj.getInt("Id");
+                String name = obj.getString("Name");
+                double charge = obj.getDouble("Charge");
+                if (address_id == id) {
+                    cartList.get(i).setShipping_Charge(charge);
+                    cartList.get(i).setAvailable(true);
+                }
+            }
+        }
+        cartAdapter.setCartList(cartList);
+    }
+
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
@@ -260,18 +283,12 @@ public class CartActivity extends AppCompatActivity implements CartClick, Adapte
 
     @Override
     public void onClick(View view) {
-        if (total_price != 0 &&
-                !seller_contacts.equals("") &&
-                !seller_accounts.equals("")) {
-
+        if (total_price != 0 && cartList.size() != 0) {
             startActivity(new Intent(CartActivity.this, CheckoutActivity.class)
                     .putExtra("total_price", total_price)
-                    .putExtra("address_id", address_id)
-                    .putExtra("address_name", address_name)
-                    .putExtra("seller_id", seller_id)
-                    .putExtra("seller_contacts", seller_contacts)
-                    .putExtra("seller_accounts", seller_accounts));
-
+                    .putExtra("seller_acc", cartList.get(0).getSeller_Acc()));
+        } else {
+            Toast.makeText(this, "Currently not available, please try later", Toast.LENGTH_SHORT).show();
         }
     }
 }

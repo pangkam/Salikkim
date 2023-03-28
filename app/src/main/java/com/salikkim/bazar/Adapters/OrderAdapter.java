@@ -3,14 +3,12 @@ package com.salikkim.bazar.Adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -30,7 +28,7 @@ import java.util.List;
 public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final Context context;
     private List<Order> orderList;
-    private OrderClick orderClick;
+    private final OrderClick orderClick;
 
     public OrderAdapter(Context context, List<Order> orderList, OrderClick orderClick) {
         this.context = context;
@@ -69,13 +67,26 @@ public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 .placeholder(shimmerDrawable)
                 .into(orderViewHolder.thumbnail);
         orderViewHolder.title.setText(orderList.get(pos).getTitle());
-        orderViewHolder.seller.setText(Html.fromHtml("Seller: <b>" + orderList.get(pos).getS_Name() + "</b>"));
-        orderViewHolder.total.setText(Html.fromHtml("Price: <b>" + context.getString(R.string.Rs) + String.format("%.0f", orderList.get(pos).getTotal_Price()) + "</b>"));
-        orderViewHolder.shipping.setText(Html.fromHtml("Shipping charge: <b>" + context.getString(R.string.Rs) + String.format("%.0f", orderList.get(pos).getShipping_Charge()) + "</b>"));
+        if (orderList.get(pos).getPayment_Screenshot() != null) {
+            if (orderList.get(pos).getPayment_Screenshot().isEmpty()) {
+                orderViewHolder.upload.setVisibility(View.VISIBLE);
+            }
+        }else {
+            orderViewHolder.upload.setVisibility(View.INVISIBLE);
+        }
+
+     /*   orderViewHolder.seller.setText(Html.fromHtml("Seller: <b>" + orderList.get(pos).getSeller_Name() + "</b>"));
+        orderViewHolder.price.setText(Html.fromHtml("<b>" + context.getString(R.string.Rs) +
+                String.format("%.0f", orderList.get(pos).getSale_Price())
+                +
+                " + " + context.getString(R.string.Rs) + String.format("%.0f", orderList.get(pos).getShipping_Charge()) + "</b>(Shipping Charge) <b>x</b> " + orderList.get(pos).getQuantity()));
+
+        orderViewHolder.total_price.setText(Html.fromHtml("Total: <b>" + context.getString(R.string.Rs) + String.format("%.0f", ((orderList.get(pos).getSale_Price())
+                + orderList.get(pos).getShipping_Charge()) * orderList.get(pos).getQuantity()) + "</b>"));
+*/
         orderViewHolder.color.setText(Html.fromHtml("Color: <b>" + orderList.get(pos).getColor() + "</b>"));
         orderViewHolder.size.setText(Html.fromHtml("Size: <b>" + orderList.get(pos).getSize() + "</b>"));
-        orderViewHolder.qnty.setText(Html.fromHtml("Quantity: <b>" + orderList.get(pos).getQuantity() + "</b>"));
-        orderViewHolder.address.setText(Html.fromHtml("<b>" + orderList.get(pos).getAddress() + "</b>"));
+        orderViewHolder.quantity.setText(Html.fromHtml("Quantity: <b>" + orderList.get(pos).getQuantity() + "</b>"));
         orderViewHolder.status.setText(Html.fromHtml("<b>" + orderList.get(pos).getStatus() + "</b>"));
     }
 
@@ -86,49 +97,56 @@ public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     class OrderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
         private ImageView thumbnail, btn_more;
-        private TextView title, seller, total, shipping, color, size, qnty, address, status, action_btn;
+        private TextView title, color, size, quantity, status, upload;
 
         public OrderViewHolder(@NonNull View itemView) {
             super(itemView);
             thumbnail = itemView.findViewById(R.id.order_thumbnail);
             title = itemView.findViewById(R.id.order_title);
-            seller = itemView.findViewById(R.id.order_seller_name);
-            total = itemView.findViewById(R.id.order_price);
-            shipping = itemView.findViewById(R.id.order_shipping_charge);
             color = itemView.findViewById(R.id.order_color);
             size = itemView.findViewById(R.id.order_size);
-            qnty = itemView.findViewById(R.id.order_quantity);
-            address = itemView.findViewById(R.id.order_address);
+            quantity = itemView.findViewById(R.id.order_quantity);
             status = itemView.findViewById(R.id.order_status);
-            action_btn = itemView.findViewById(R.id.order_btn_action);
             btn_more = itemView.findViewById(R.id.order_btn_more);
+            upload = itemView.findViewById(R.id.order_btn_upload);
 
+            itemView.setOnClickListener(this);
+            upload.setOnClickListener(this);
 
-            action_btn.setOnClickListener(new View.OnClickListener() {
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    orderClick.onActionClick(orderList.get(getAdapterPosition()), getAdapterPosition());
+                    orderClick.onOrderClick(orderList.get(getAdapterPosition()));
                 }
             });
+
             btn_more.setOnClickListener(this);
         }
 
         @SuppressLint("RestrictedApi")
         @Override
         public void onClick(View view) {
-            PopupMenu popupMenu = new PopupMenu(view.getContext(), view);
-            if (popupMenu.getMenu() instanceof MenuBuilder) {
-                ((MenuBuilder) popupMenu.getMenu()).setOptionalIconsVisible(true);
+            switch (view.getId()) {
+                case R.id.order_btn_more:
+                    PopupMenu popupMenu = new PopupMenu(view.getContext(), view);
+                    if (popupMenu.getMenu() instanceof MenuBuilder) {
+                        ((MenuBuilder) popupMenu.getMenu()).setOptionalIconsVisible(true);
+                    }
+                    popupMenu.getMenuInflater().inflate(R.menu.menu_order, popupMenu.getMenu());
+                    popupMenu.setOnMenuItemClickListener(this);
+                    popupMenu.show();
+                    break;
+                case R.id.order_btn_upload:
+                    orderClick.onUploadClick(orderList.get(getAdapterPosition()));
+                    break;
             }
-            popupMenu.getMenuInflater().inflate(R.menu.menu_order, popupMenu.getMenu());
-            popupMenu.setOnMenuItemClickListener(this);
-            popupMenu.show();
+
         }
 
         @Override
         public boolean onMenuItemClick(MenuItem menuItem) {
             int position = getAdapterPosition();
-            orderClick.onMenuClick(position,orderList.get(position),menuItem);
+            orderClick.onMenuClick(position, orderList.get(position), menuItem);
             return false;
         }
     }

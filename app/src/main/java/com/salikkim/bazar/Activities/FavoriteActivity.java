@@ -27,6 +27,7 @@ public class FavoriteActivity extends AppCompatActivity implements FavoriteClick
     private ActivityFavoriteBinding favoriteBinding;
     private List<Product> favLists = new ArrayList<>();
     private FavoriteAdapter favoriteAdapter;
+    private String user_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,15 +39,16 @@ public class FavoriteActivity extends AppCompatActivity implements FavoriteClick
         setSupportActionBar(favoriteBinding.toolbarFavActivity);
         favoriteBinding.toolbarFavActivity.setNavigationIcon(R.drawable.baseline_arrow_back);
         favoriteBinding.toolbarFavActivity.setNavigationOnClickListener(v -> finish());
+        user_id = getIntent().getExtras().getString("user_id");
         favoriteBinding.recViewFav.setHasFixedSize(true);
         favoriteBinding.recViewFav.setLayoutManager(new GridLayoutManager(FavoriteActivity.this, 2));
         favoriteAdapter = new FavoriteAdapter(FavoriteActivity.this, favLists, this);
         favoriteBinding.recViewFav.setAdapter(favoriteAdapter);
-        getFavLists(1);
+        getFavLists();
 
     }
 
-    private void getFavLists(int user_id) {
+    private void getFavLists() {
         Call<List<Product>> call = ApiController.getInstance().getApi().getFavorite(user_id);
         call.enqueue(new Callback<List<Product>>() {
             @Override
@@ -93,7 +95,7 @@ public class FavoriteActivity extends AppCompatActivity implements FavoriteClick
 
     @Override
     public void onMoveClick(Product product, int position) {
-        Call<ResponseModel> call = ApiController.getInstance().getApi().moveCart(1,product.getF_Id(),product.getS_id(),product.getP_Id());
+        Call<ResponseModel> call = ApiController.getInstance().getApi().moveCart(user_id,product.getF_Id(),product.getS_id(),product.getP_Id());
         call.enqueue(new Callback<ResponseModel>() {
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {

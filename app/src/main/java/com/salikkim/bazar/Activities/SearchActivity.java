@@ -42,6 +42,7 @@ public class SearchActivity extends AppCompatActivity implements ProductClick {
         searchBinding.recViewSearch.setHasFixedSize(true);
         searchBinding.recViewSearch.setLayoutManager(new GridLayoutManager(SearchActivity.this, 2));
         productAdapter = new ProductAdapter(SearchActivity.this, searchLists, this);
+        searchBinding.recViewSearch.setAdapter(productAdapter);
         getSearchLists(query);
     }
 

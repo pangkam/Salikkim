@@ -2,26 +2,36 @@ package com.salikkim.bazar.Activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.SearchView;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationBarView;
 import com.salikkim.bazar.Fragments.AccountFragment;
 import com.salikkim.bazar.Fragments.CategoryFragment;
 import com.salikkim.bazar.Fragments.HomeFragment;
+import com.salikkim.bazar.Fragments.SetupAcDialog;
 import com.salikkim.bazar.R;
 import com.salikkim.bazar.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
     private ActivityMainBinding mainBinding;
     private boolean flag = true;
+    private String MY_PREFS_NAME = "User";
+    private String user_id = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +42,9 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         mainBinding.toolbarMainActivity.setTitle("Home");
         setSupportActionBar(mainBinding.toolbarMainActivity);
         mainBinding.bottomNavigation.setOnItemSelectedListener(this);
+
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
+        user_id = prefs.getString("user_id", null);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container_main, new HomeFragment())
@@ -77,17 +90,21 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
         MenuItem search = menu.findItem(R.id.search);
         SearchView searchView = (SearchView) search.getActionView();
+        searchView.setBackground(getResources().getDrawable(R.drawable.bg_search));
         searchView.setQueryHint("Type to search");
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        EditText searchEditText = ((EditText) searchView.findViewById(androidx.appcompat.R.id.search_src_text));
+        searchEditText.setTextColor(getResources().getColor(R.color.white));
+        searchEditText.setHintTextColor(getResources().getColor(R.color.hint_text));
+        searchView.setOnQueryTextListener(new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String s) {
+            public boolean onQueryTextSubmit(String query) {
                 startActivity(new Intent(MainActivity.this, SearchActivity.class)
-                        .putExtra("query", s));
+                        .putExtra("query", query));
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String s) {
+            public boolean onQueryTextChange(String newText) {
                 return false;
             }
         });
@@ -98,10 +115,18 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.favorite:
-                startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
+                if (user_id != null) {
+                    startActivity(new Intent(MainActivity.this, FavoriteActivity.class).putExtra("user_id", user_id));
+                } else {
+                    Toast.makeText(this, "Need login", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case R.id.cart:
-                startActivity(new Intent(MainActivity.this, CartActivity.class));
+                if (user_id != null) {
+                    startActivity(new Intent(MainActivity.this, CartActivity.class));
+                } else {
+                    Toast.makeText(this, "Need login", Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
         return true;
